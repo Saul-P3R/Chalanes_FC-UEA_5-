@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interacción Musical y Canvas</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        canvas { border: 2px solid #333; display: block; margin: 20px auto; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Selecciona una Canción</h1>
+    <select id="songList" onchange="playSong()">
+        <option value="song1.mp3" data-link="song1.html">Canción 1</option>
+        <option value="song2.mp3" data-link="song2.html">Canción 2</option>
+        <option value="song3.mp3" data-link="song3.html">Canción 3</option>
+    </select>
+
+    <audio id="audioPlayer" controls style="margin-top: 20px;"></audio>
+
+    <h2>Explora el Canvas</h2>
+    <canvas id="interactiveCanvas" width="600" height="400"></canvas>
+
+    <script>
+        function playSong() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            const songList = document.getElementById('songList');
+            const selectedOption = songList.options[songList.selectedIndex];
+            audioPlayer.src = selectedOption.value;
+            audioPlayer.play();
+            
+            // Redirigir a la página asociada con la canción seleccionada
+            window.location.href = selectedOption.getAttribute('data-link');
+        }
+
+        const canvas = document.getElementById('interactiveCanvas');
+        const ctx = canvas.getContext('2d');
+        let shapes = [];
+
+        canvas.addEventListener('click', (event) => {
+            const x = event.offsetX;
+            const y = event.offsetY;
+
+            let shape;
+            if (x < canvas.width / 2 && y < canvas.height / 2) {
+                shape = { type: 'circle', x, y };
+            } else if (x >= canvas.width / 2 && y < canvas.height / 2) {
+                shape = { type: 'square', x, y };
+            } else if (x < canvas.width / 2 && y >= canvas.height / 2) {
+                shape = { type: 'triangle', x, y };
+            } else {
+                shape = { type: 'star', x, y };
+            }
+            
+            shapes.push(shape);
+            drawShapes();
+            
+            setTimeout(() => {
+                shapes = shapes.filter(s => s !== shape);
+                drawShapes();
+            }, 1000);
+        });
+
+        function drawShapes() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            shapes.forEach(shape => {
+                if (shape.type === 'circle') drawCircle(shape.x, shape.y);
+                if (shape.type === 'square') drawSquare(shape.x, shape.y);
+                if (shape.type === 'triangle') drawTriangle(shape.x, shape.y);
+                if (shape.type === 'star') drawStar(shape.x, shape.y);
+            });
+        }
+
+        function drawCircle(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, 30, 0, Math.PI * 2);
+            ctx.fillStyle = 'blue';
+            ctx.fill();
+        }
+
+        function drawSquare(x, y) {
+            ctx.fillStyle = 'green';
+            ctx.fillRect(x - 20, y - 20, 40, 40);
+        }
+
+        function drawTriangle(x, y) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + 30, y + 50);
+            ctx.lineTo(x - 30, y + 50);
+            ctx.closePath();
+            ctx.fillStyle = 'red';
+            ctx.fill();
+        }
+
+        function drawStar(x, y) {
+            ctx.fillStyle = 'yellow';
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                let angle = (Math.PI / 180) * (i * 144);
+                let xOffset = Math.cos(angle) * 30;
+                let yOffset = Math.sin(angle) * 30;
+                ctx.lineTo(x + xOffset, y + yOffset);
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+    </script>
+</body>
+</html>
